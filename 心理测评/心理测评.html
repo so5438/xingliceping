@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>员工心理状态测评 · 一题一页</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #f2f6fd;
+            font-family: "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            margin: 0;
+        }
+        .card {
+            max-width: 720px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 36px;
+            padding: 40px 35px 30px;
+            box-shadow: 0 20px 50px rgba(0, 20, 40, 0.10);
+            transition: all 0.2s;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+        }
+        .header .title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b1e33;
+            letter-spacing: 0.3px;
+        }
+        .header .badge {
+            background: #eaf1fd;
+            color: #1f4e8c;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 4px 18px;
+            border-radius: 40px;
+            border: 1px solid #c5d9f0;
+        }
+        .progress-wrap {
+            background: #e9eff7;
+            border-radius: 40px;
+            height: 8px;
+            margin: 10px 0 22px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #2a6bb0;
+            border-radius: 40px;
+            transition: width 0.35s ease;
+        }
+        .question-area {
+            padding: 10px 0 10px;
+        }
+        .q-number {
+            font-size: 15px;
+            font-weight: 500;
+            color: #4b6f93;
+            margin-bottom: 6px;
+        }
+        .q-text {
+            font-size: 21px;
+            font-weight: 600;
+            line-height: 1.6;
+            color: #102a44;
+            padding: 8px 0 16px;
+        }
+        .reverse-tag {
+            display: inline-block;
+            background: #f0eaf8;
+            color: #6f4f8a;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 2px 16px;
+            border-radius: 30px;
+            margin-left: 10px;
+            border: 1px solid #d6c7e8;
+        }
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 14px;
+            margin: 20px 0 10px;
+            justify-content: center;
+        }
+        .options-grid label {
+            flex: 1 0 52px;
+            min-width: 60px;
+            background: #f7faff;
+            border: 2px solid #dde6f2;
+            border-radius: 60px;
+            padding: 14px 8px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 17px;
+            color: #1d3a5a;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+        .options-grid label span.sub {
+            font-weight: 400;
+            font-size: 12px;
+            color: #5d7b9b;
+        }
+        .options-grid input[type="radio"] {
+            display: none;
+        }
+        .options-grid input[type="radio"]:checked + span {
+            color: #1a3f69;
+        }
+        .options-grid label:has(input:checked) {
+            background: #dce8fa;
+            border-color: #2a6bb0;
+            box-shadow: 0 4px 10px rgba(42, 107, 176, 0.15);
+            transform: scale(1.01);
+        }
+        .options-grid label:hover:not(.disabled) {
+            background: #e7effb;
+            border-color: #8eb1d9;
+        }
+        /* 锁定/不可点击样式 */
+        .options-grid label.disabled {
+            opacity: 0.7;
+            cursor: default;
+            background: #f1f5fa;
+            border-color: #ccd8e8;
+        }
+        .options-grid label.disabled:hover {
+            background: #f1f5fa;
+            border-color: #ccd8e8;
+        }
+        .options-grid label.disabled input:checked + span {
+            color: #1f3a5f;
+        }
+
+        .action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            border: none;
+            background: #e3ecf9;
+            padding: 14px 34px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1a3a60;
+            cursor: pointer;
+            transition: 0.15s;
+            border: 1px solid transparent;
+            flex: 1 0 auto;
+            min-width: 100px;
+        }
+        .btn-primary {
+            background: #1f4e8c;
+            color: white;
+            box-shadow: 0 6px 16px rgba(28, 78, 150, 0.20);
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: #15407a;
+            transform: translateY(-2px);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .btn-secondary {
+            background: #eaf1fa;
+            border-color: #c9d8ec;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background: #dce6f2;
+        }
+        .btn-secondary:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .btn-success {
+            background: #257a4a;
+            color: white;
+        }
+        .btn-success:hover:not(:disabled) {
+            background: #1a633a;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #b8cee8;
+            color: #1f4a73;
+        }
+        .btn-outline:hover:not(:disabled) {
+            background: #e7effb;
+        }
+        .status-msg {
+            font-size: 14px;
+            color: #3f648a;
+            padding: 8px 0 4px;
+            text-align: center;
+        }
+
+        /* 完成页 */
+        .complete-icon {
+            font-size: 56px;
+            text-align: center;
+            margin: 12px 0 10px;
+        }
+        .result-summary {
+            background: #f2f8ff;
+            border-radius: 24px;
+            padding: 22px 24px;
+            margin: 18px 0 10px;
+            border: 1px solid #d3e2f5;
+        }
+        .result-summary .big-score {
+            font-size: 44px;
+            font-weight: 700;
+            color: #1f4e8c;
+        }
+        .result-summary .level-tag {
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .footnote {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #4a688a;
+            background: #f6faff;
+            padding: 14px 20px;
+            border-radius: 16px;
+            border: 1px solid #dae6f5;
+        }
+        .footnote strong {
+            color: #b13e3e;
+        }
+
+        @media (max-width: 500px) {
+            .card { padding: 28px 18px; }
+            .q-text { font-size: 19px; }
+            .options-grid label { min-width: 50px; padding: 12px 4px; font-size: 15px; }
+            .btn { padding: 12px 20px; font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="app">
+    <!-- 头部 -->
+    <div class="header">
+        <span class="title">🧠 心理测评</span>
+        <span class="badge" id="progressText">1 / 22</span>
+    </div>
+    <div class="progress-wrap">
+        <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    </div>
+
+    <!-- 动态内容区 -->
+    <div id="dynamicContent">
+        <!-- 由 js 渲染 -->
+    </div>
+
+    <!-- 底部提示 -->
+    <div class="footnote" style="margin-top: 30px;">
+        <strong>⚠️ 重要提醒：</strong> 分数仅为筛查参考，<strong>高分不等于心理疾病</strong>，仅代表近期压力水平。
+        提交后不可修改，请认真作答。
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- 题目数据 ----------
+        const dimensions = [
+            {
+                name: '情绪状态',
+                questions: [
+                    '容易感到心情低落、沮丧',
+                    '容易烦躁、易怒，一点小事就情绪波动',
+                    '感到焦虑、担忧，心里放不下事情',
+                    '对以往感兴趣的事情提不起兴致',
+                    '容易紧张、心慌，精神放松不下来'
+                ]
+            },
+            {
+                name: '工作压力',
+                questions: [
+                    '工作任务多，经常感觉超负荷',
+                    '工作压力大，下班之后依旧无法摆脱工作思绪',
+                    '对工作产生疲惫、倦怠感',
+                    '感觉工作付出与回报不对等',
+                    '面对工作挑战，容易产生无力感'
+                ]
+            },
+            {
+                name: '睡眠与躯体反应',
+                questions: [
+                    '入睡困难、多梦、容易早醒，睡眠质量差',
+                    '容易疲惫，休息后也很难恢复精力',
+                    '会出现莫名头疼、胸闷、肌肉紧绷等身体不适',
+                    '食欲明显下降或者暴饮暴食'
+                ]
+            },
+            {
+                name: '人际与团队适配',
+                questions: [
+                    '和同事沟通协作感到吃力',
+                    '不愿意与人交流，想要回避社交',
+                    '能够获得同事、领导的理解与支持（反向）',
+                    '遇到困难时，身边可以倾诉的人较少'
+                ]
+            },
+            {
+                name: '自我认知与职业心态',
+                questions: [
+                    '怀疑自己的工作能力，产生自我否定',
+                    '对未来职业发展感到迷茫',
+                    '能够找到工作中的成就感与价值感（反向）',
+                    '相信自己可以应对工作中的各类问题（反向）'
+                ]
+            }
+        ];
+
+        // 展平所有题目 (保留维度信息)
+        const flatItems = [];
+        dimensions.forEach((dim, dimIdx) => {
+            dim.questions.forEach((q, qIdx) => {
+                flatItems.push({
+                    text: q,
+                    dimName: dim.name,
+                    dimIndex: dimIdx,
+                    qIndex: qIdx,
+                    globalIndex: flatItems.length,
+                    isReverse: false, // 后面统一设置
+                });
+            });
+        });
+        // 反向题号 (0-based): 16,20,21  (第17,21,22题)
+        const reverseSet = new Set([16, 20, 21]);
+        flatItems.forEach((item, idx) => {
+            if (reverseSet.has(idx)) item.isReverse = true;
+        });
+        const TOTAL = flatItems.length; // 22
+
+        // 存储答案 (索引 -> 1~5)
+        let answers = new Array(TOTAL).fill(null);
+        // 当前题号 (0-based)
+        let currentIndex = 0;
+        // 是否已提交锁定
+        let locked = false;
+
+        // DOM 引用
+        const contentEl = document.getElementById('dynamicContent');
+        const progressText = document.getElementById('progressText');
+        const progressBar = document.getElementById('progressBar');
+
+        // ---------- 工具函数 ----------
+        function getScore() {
+            let total = 0;
+            let allFilled = true;
+            for (let i = 0; i < TOTAL; i++) {
+                const val = answers[i];
+                if (val === null) {
+                    allFilled = false;
+                    continue;
+                }
+                let finalVal = val;
+                if (flatItems[i].isReverse) {
+                    finalVal = 6 - val;
+                }
+                total += finalVal;
+            }
+            return { total, allFilled };
+        }
+
+        function getLevel(total) {
+            if (total >= 22 && total <= 44) return { level: '✅ 心理状态良好', desc: '情绪稳定，压力可控，适应较好；保持现有工作节奏即可。' };
+            else if (total >= 45 && total <= 70) return { level: '🟡 轻度压力困扰', desc: '存在部分焦虑疲惫，属于职场常见状态；建议调整作息、做好时间管理，适当放松。' };
+            else if (total >= 71 && total <= 90) return { level: '🟠 中度心理压力', desc: '压力情绪较为明显，睡眠、情绪受到影响；建议主动调节，可寻求同事或主管支持。' };
+            else if (total >= 91 && total <= 110) return { level: '🔴 高风险状态', desc: '多项负面感受频繁出现，建议优先寻求专业心理咨询帮助，可适当调整工作负荷。' };
+            else return { level: '—', desc: '请完成全部题目' };
+        }
+
+        // 更新进度
+        function updateProgress() {
+            const shown = currentIndex + 1;
+            progressText.textContent = `${shown} / ${TOTAL}`;
+            const pct = (currentIndex / TOTAL) * 100;
+            progressBar.style.width = `${Math.min(pct, 100)}%`;
+        }
+
+        // ---------- 渲染当前题目 ----------
+        function renderQuestion() {
+            if (locked) {
+                // 如果锁定，直接显示完成页 (但通常锁定后跳转到完成页)
+                renderCompletePage();
+                return;
+            }
+
+            if (currentIndex >= TOTAL) {
+                // 所有题目已答完 -> 自动进入完成页 (但这里由下一步控制)
+                renderCompletePage();
+                return;
+            }
+
+            const item = flatItems[currentIndex];
+            const idx = currentIndex;
+            const selectedVal = answers[idx]; // null 或 1~5
+
+            let html = `<div class="question-area">`;
+            html += `<div class="q-number">第 ${idx+1} 题 / ${TOTAL} 题 · ${item.dimName}</div>`;
+            html += `<div class="q-text">${item.text}`;
+            if (item.isReverse) {
+                html += `<span class="reverse-tag">反向</span>`;
+            }
+            html += `</div>`;
+
+            // 选项
+            html += `<div class="options-grid" id="optionsGrid">`;
+            const labels = ['完全没有', '偶尔', '有时', '经常', '总是'];
+            for (let v = 1; v <= 5; v++) {
+                const checked = (selectedVal === v) ? 'checked' : '';
+                html += `<label class="${locked ? 'disabled' : ''}">
+                            <input type="radio" name="q" value="${v}" ${checked} ${locked ? 'disabled' : ''}>
+                            <span>${v}</span>
+                            <span class="sub">${labels[v-1]}</span>
+                         </label>`;
+            }
+            html += `</div>`;
+
+            // 操作按钮
+            html += `<div class="action-row">`;
+            // 上一题 (仅当不是第一题)
+            if (idx > 0) {
+                html += `<button class="btn btn-secondary" id="prevBtn" ${locked ? 'disabled' : ''}>← 上一题</button>`;
+            } else {
+                html += `<div></div>`;
+            }
+
+            if (idx === TOTAL - 1) {
+                // 最后一题：显示“提交测评”
+                const allFilled = answers.every(a => a !== null);
+                html += `<button class="btn btn-primary" id="submitBtn" ${(!allFilled || locked) ? 'disabled' : ''}>📩 提交测评 · 锁定</button>`;
+            } else {
+                const hasAnswer = answers[idx] !== null;
+                html += `<button class="btn btn-primary" id="nextBtn" ${(!hasAnswer || locked) ? 'disabled' : ''}>下一题 →</button>`;
+            }
+            html += `</div>`;
+
+            // 如果当前题已选，显示小提示
+            if (selectedVal !== null) {
+                html += `<div class="status-msg" style="color:#1f6b3a;">✅ 已选择：${labels[selectedVal-1]}</div>`;
+            } else {
+                html += `<div class="status-msg" style="color:#8f6b3a;">请选择一个选项</div>`;
+            }
+
+            contentEl.innerHTML = html;
+
+            // 绑定事件
+            bindEvents(idx);
+
+            // 更新进度
+            updateProgress();
+        }
+
+        // ---------- 绑定事件 (radio + 按钮) ----------
+        function bindEvents(idx) {
+            // radio 变更
+            const radios = document.querySelectorAll('input[name="q"]');
+            radios.forEach(radio => {
+                radio.addEventListener('change', function(e) {
+                    if (locked) {
+                        e.preventDefault();
+                        return;
+                    }
+                    const val = parseInt(this.value, 10);
+                    answers[idx] = val;
+                    // 重新渲染当前页面 (刷新UI)
+                    renderQuestion();
+                });
+            });
+
+            // 上一题
+            const prevBtn = document.getElementById('prevBtn');
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (locked) return;
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        renderQuestion();
+                    }
+                });
+            }
+
+            // 下一题
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (locked) return;
+                    if (answers[idx] === null) {
+                        alert('请先选择当前题目的答案');
+                        return;
+                    }
+                    if (currentIndex < TOTAL - 1) {
+                        currentIndex++;
+                        renderQuestion();
+                    }
+                });
+            }
+
+            // 提交按钮 (最后一题)
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', function() {
+                    if (locked) return;
+                    // 检查所有题目是否已答
+                    const { allFilled } = getScore();
+                    if (!allFilled) {
+                        alert('还有题目未作答，请完成全部题目。');
+                        return;
+                    }
+                    // 锁定
+                    lockAll();
+                });
+            }
+        }
+
+        // ---------- 锁定全部 (提交) ----------
+        function lockAll() {
+            if (locked) return;
+            // 检查是否全部填完
+            const { allFilled } = getScore();
+            if (!allFilled) {
+                alert('请完成全部题目后再提交。');
+                return;
+            }
+            locked = true;
+            // 禁用所有 radio (通过重新渲染)
+            renderCompletePage();
+        }
+
+        // ---------- 完成页面 (显示总分 + 锁定状态) ----------
+        function renderCompletePage() {
+            const { total, allFilled } = getScore();
+            const info = getLevel(total);
+            // 强制锁定状态
+            locked = true;
+
+            let html = `<div class="complete-icon">📋</div>`;
+            html += `<h3 style="text-align:center; font-size:22px; margin-bottom:4px;">测评已完成</h3>`;
+            html += `<p style="text-align:center; color:#3a5f7a; font-size:15px;">答案已锁定，不可修改</p>`;
+
+            if (allFilled) {
+                html += `<div class="result-summary">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+                                <span style="font-size:18px; font-weight:500;">总分</span>
+                                <span class="big-score">${total} <span style="font-size:20px; font-weight:400; color:#3a5f7a;">/ 110</span></span>
+                            </div>
+                            <div style="margin-top:14px;">
+                                <div class="level-tag">${info.level}</div>
+                                <div style="margin-top:6px; color:#1f3f60;">${info.desc}</div>
+                            </div>
+                         </div>`;
+            } else {
+                html += `<div style="background:#fcf2e8; border-radius:20px; padding:20px; text-align:center; border:1px solid #f0d5b8;">
+                            <span style="font-size:20px;">⚠️</span> 部分题目未作答，无法计算总分。
+                         </div>`;
+            }
+
+            // 展示所有题目的答案摘要 (可选)
+            html += `<div style="margin-top:18px; background:#f8faff; border-radius:18px; padding:14px 16px; border:1px solid #dae6f5; max-height:200px; overflow-y:auto;">`;
+            html += `<div style="font-weight:600; font-size:14px; color:#1f3f60; margin-bottom:8px;">📌 答题回顾</div>`;
+            const labelMap = ['完全没有', '偶尔', '有时', '经常', '总是'];
+            flatItems.forEach((item, i) => {
+                const val = answers[i];
+                const display = val !== null ? `${val} - ${labelMap[val-1]}` : '未作答';
+                const revMark = item.isReverse ? ' (反向)' : '';
+                html += `<div style="display:flex; justify-content:space-between; font-size:14px; padding:4px 0; border-bottom:1px dashed #e3edf8;">
+                            <span style="color:#1d3a5a;">${i+1}. ${item.text}${revMark}</span>
+                            <span style="font-weight:500; color:#1f4e8c;">${display}</span>
+                         </div>`;
+            });
+            html += `</div>`;
+
+            // 操作：重新开始 (清除所有数据)
+            html += `<div class="action-row" style="margin-top:22px; justify-content:center;">
+                        <button class="btn btn-outline" id="resetAllBtn">🔄 重新测评 (清除所有记录)</button>
+                     </div>`;
+
+            contentEl.innerHTML = html;
+            progressText.textContent = `${TOTAL} / ${TOTAL}`;
+            progressBar.style.width = `100%`;
+
+            // 绑定重置事件
+            const resetBtn = document.getElementById('resetAllBtn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    if (confirm('确定要重新测评吗？当前所有答案将被清除。')) {
+                        resetAll();
+                    }
+                });
+            }
+        }
+
+        // ---------- 重置全部 ----------
+        function resetAll() {
+            answers.fill(null);
+            currentIndex = 0;
+            locked = false;
+            // 重新从第一题开始
+            renderQuestion();
+        }
+
+        // ---------- 初始化 ----------
+        function init() {
+            // 默认从第一题开始
+            currentIndex = 0;
+            renderQuestion();
+        }
+
+        init();
+    })();
+</script>
+</body>
+</html>
